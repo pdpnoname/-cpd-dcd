@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <link rel="manifest" href="#" id="manifest-placeholder">
+    <meta name="theme-color" content="#4338ca">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: sans-serif;
+        }
+        body {
+            background: linear-gradient(to bottom, #4338ca, #7e22ce);
+            min-height: 100vh;
+            color: white;
+        }
+        .container {
+            max-width: 380px;
+            margin: 0 auto;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .search-box {
+            position: relative;
+            margin-bottom: 2rem;
+            margin-top: 1rem;
+        }
+        .search-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 9999px;
+            border: none;
+            background-color: rgba(67, 56, 202, 0.7);
+            color: white;
+            font-size: 1rem;
+        }
+        .search-input::placeholder {
+            color: #cbd5e1;
+        }
+        .search-input:focus {
+            outline: none;
+        }
+        .weather-display {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .weather-icon {
+            position: relative;
+            width: 120px;
+            height: 100px;
+            margin-bottom: 1.5rem;
+        }
+        .sun {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background-color: #fcd34d;
+            border-radius: 50%;
+            top: -10px;
+            left: -10px;
+        }
+        .sun::before, .sun::after {
+            content: "";
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background-color: #fcd34d;
+            border-radius: 50%;
+        }
+        .sun::before {
+            top: -8px;
+            left: 21px;
+        }
+        .sun::after {
+            top: 5px;
+            left: -8px;
+        }
+        .sun-ray {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background-color: #fcd34d;
+            border-radius: 50%;
+            top: 5px;
+            right: -8px;
+        }
+        .cloud {
+            position: absolute;
+            width: 80px;
+            height: 60px;
+            background-color: #f1f5f9;
+            border-radius: 9999px;
+            top: 10px;
+            left: 25px;
+        }
+        .rain {
+            position: absolute;
+            width: 8px;
+            height: 16px;
+            background-color: #38bdf8;
+            border-radius: 9999px;
+            transform: rotate(15deg);
+        }
+        .rain-1 {
+            bottom: 0;
+            left: 35px;
+        }
+        .rain-2 {
+            bottom: 4px;
+            left: 50px;
+        }
+        .rain-3 {
+            bottom: 0;
+            left: 65px;
+        }
+        .temperature {
+            font-size: 5rem;
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+        }
+        .city {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        .min-max {
+            font-size: 0.875rem;
+        }
+        .date-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-top: 1px solid rgba(126, 34, 206, 0.5);
+            margin-top: 1rem;
+        }
+        .search-button {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: #eab308;
+            color: #4338ca;
+            border: none;
+            border-radius: 9999px;
+            font-weight: bold;
+            font-size: 1rem;
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+        }
+        .install-prompt {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            text-align: center;
+            margin-top: 1rem;
+            display: none;
+        }
+        .install-button {
+            background-color: #eab308;
+            color: #4338ca;
+            border: none;
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+            font-weight: bold;
+            margin-top: 0.5rem;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="search-box">
+            <input type="text" class="search-input" placeholder="Search city" id="citySearch">
+        </div>
+        
+        <div class="weather-display">
+            <div class="weather-icon">
+                <div class="sun"></div>
+                <div class="sun-ray"></div>
+                <div class="cloud"></div>
+                <div class="rain rain-1"></div>
+                <div class="rain rain-2"></div>
+                <div class="rain rain-3"></div>
+            </div>
+            
+            <div class="temperature">19°</div>
+            <div class="city">Tashkent</div>
+            <div class="min-max">Max: 24° Min:18°</div>
+        </div>
+        
+        <div class="date-bar">
+            <span>Today</span>
+            <span>July, 21</span>
+        </div>
+        
+        <button class="search-button" id="searchButton">Search</button>
+        
+        <div class="install-prompt" id="installPrompt">
+            <div>Install this app on your phone</div>
+            <button class="install-button" id="installButton">Install</button>
+        </div>
+    </div>
+
+    <script>
+        // PWA functionality
+        const manifestData = {
+            "name": "Weather App",
+            "short_name": "Weather",
+            "start_url": ".",
+            "display": "standalone",
+            "background_color": "#4338ca",
+            "theme_color": "#4338ca",
+            "description": "A simple weather app",
+            "icons": [
+                {
+                    "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%234338ca'/%3E%3Ccircle cx='256' cy='256' r='150' fill='%23fcd34d'/%3E%3C/svg%3E",
+                    "sizes": "512x512",
+                    "type": "image/svg+xml"
+                }
+            ]
+        };
+
+        // Create a Blob with the manifest data
+        const manifestBlob = new Blob([JSON.stringify(manifestData)], {type: 'application/json'});
+        const manifestURL = URL.createObjectURL(manifestBlob);
+        document.getElementById('manifest-placeholder').setAttribute('href', manifestURL);
+
+        // Simple app functionality
+        const cityInput = document.getElementById('citySearch');
+        const searchButton = document.getElementById('searchButton');
+        const cityDisplay = document.querySelector('.city');
+        
+        searchButton.addEventListener('click', () => {
+            if (cityInput.value.trim() !== '') {
+                cityDisplay.textContent = cityInput.value;
+                cityInput.value = '';
+            }
+        });
+
+        // Service worker for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').then(registration => {
+                    console.log('ServiceWorker registration successful');
+                }).catch(err => {
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+            });
+        }
+
+        // Install prompt
+        let deferredPrompt;
+        const installPrompt = document.getElementById('installPrompt');
+        const installButton = document.getElementById('installButton');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installPrompt.style.display = 'block';
+        });
+
+        installButton.addEventListener('click', () => {
+            installPrompt.style.display = 'none';
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then((choiceResult) => {
+                if (choiceResult.outcome === 'accepted') {
+                    console.log('User accepted the install prompt');
+                } else {
+                    console.log('User dismissed the install prompt');
+                }
+                deferredPrompt = null;
+            });
+        });
+
+        // Create a service worker file
+        const swContent = `
+            self.addEventListener('install', (event) => {
+                event.waitUntil(
+                    caches.open('weather-app-v1').then((cache) => {
+                        return cache.addAll([
+                            './',
+                            './index.html'
+                        ]);
+                    })
+                );
+            });
+
+            self.addEventListener('fetch', (event) => {
+                event.respondWith(
+                    caches.match(event.request).then((response) => {
+                        return response || fetch(event.request);
+                    })
+                );
+            });
+        `;
+
+        const swBlob = new Blob([swContent], {type: 'text/javascript'});
+        const swURL = URL.createObjectURL(swBlob);
+
+        // Dynamically create service worker file
+        const link = document.createElement('link');
+        link.rel = 'serviceworker';
+        link.href = swURL;
+        document.head.appendChild(link);
+    </script>
+</body>
+</html>
